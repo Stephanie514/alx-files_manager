@@ -60,7 +60,7 @@ function controllerRouting(app) {
   });
 
   // Uncommented routes (to be implemented or removed)
-  
+
   router.put('/files/:id/publish', (req, res) => {
     FilesController.putPublish(req, res);
   });
@@ -72,7 +72,6 @@ function controllerRouting(app) {
   router.get('/files/:id/data', (req, res) => {
     FilesController.getFile(req, res);
   });
-
 
   // Mounting the router at the root path
   app.use('/', router);

@@ -1,9 +1,8 @@
-// UsersController.js
-
 import crypto from 'crypto';
 import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
+import { userQueue } from '../utils/queues'; // Importing Bull userQueue
 
 class UsersController {
   static async postNew(req, res) {
@@ -32,14 +31,17 @@ class UsersController {
 
       const result = await dbClient.db.collection('users').insertOne(newUser);
 
-      // Returning response after successfully creating a new user
+      // Adding job to Bull userQueue for sending welcome email
+      await userQueue.add({ userId: result.insertedId });
+
+      // Return response after successfully creating a new user
       return res.status(201).json({
         id: result.insertedId,
         email,
       });
     } catch (error) {
       console.error('Error in postNew:', error);
-      // Returning error response in case of any errors during the process
+      // Return error response in case of any errors during the process
       return res.status(500).json({ error: 'Internal Server Error' });
     }
   }
@@ -65,14 +67,14 @@ class UsersController {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
-      // Returning user data after successfully retrieving it
+      // Return user data after successfully retrieving it
       return res.status(200).json({
         id: user._id,
         email: user.email,
       });
     } catch (error) {
       console.error('Error in getMe:', error);
-      // Returning error response in case of any errors during the process
+      // Return error response in case of any errors during the process
       return res.status(500).json({ error: 'Internal Server Error' });
     }
   }
