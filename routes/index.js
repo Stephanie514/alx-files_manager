@@ -7,16 +7,13 @@ import FilesController from '../controllers/FilesController';
 /**
  * Routes- requests the appropriate controller based on URL
  *
- * @param - app - This is the express application object.
- * @return - void(0)
+ * @param {express.Application} app - The express application object.
  */
 function controllerRouting(app) {
   const router = express.Router();
-  app.use('/', router);
 
   // AppController
-
-  // route which should return status of Redis and DB
+  // Route which should return status of Redis and DB
   router.get('/status', (req, res) => {
     AppController.getStatus(req, res);
   });
@@ -26,9 +23,8 @@ function controllerRouting(app) {
     AppController.getStats(req, res);
   });
 
-  // UserController
-
-  // should create a new user document in DB
+  // UsersController
+  // Should create a new user document in DB
   router.post('/users', (req, res) => {
     UsersController.postNew(req, res);
   });
@@ -38,8 +34,7 @@ function controllerRouting(app) {
     UsersController.getMe(req, res);
   });
 
-  // AuthCntroller
-
+  // AuthController
   // Route to return user document based on token
   router.get('/connect', (req, res) => {
     AuthController.getConnect(req, res);
@@ -50,9 +45,8 @@ function controllerRouting(app) {
     AuthController.getDisconnect(req, res);
   });
 
-  // Files Controller
-
-  // Routes to return file document based on ID
+  // FilesController
+  // Routes to handle file operations
   router.post('/files', (req, res) => {
     FilesController.postUpload(req, res);
   });
@@ -65,7 +59,9 @@ function controllerRouting(app) {
     FilesController.getIndex(req, res);
   });
 
-/*router.put('/files/:id/publish', (req, res) => {
+  // Uncommented routes (to be implemented or removed)
+  
+  router.put('/files/:id/publish', (req, res) => {
     FilesController.putPublish(req, res);
   });
 
@@ -75,6 +71,11 @@ function controllerRouting(app) {
 
   router.get('/files/:id/data', (req, res) => {
     FilesController.getFile(req, res);
-  });*/
+  });
+
+
+  // Mounting the router at the root path
+  app.use('/', router);
 }
+
 export default controllerRouting;

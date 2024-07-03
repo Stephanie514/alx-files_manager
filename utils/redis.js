@@ -1,4 +1,5 @@
 const redis = require('redis');
+const { promisify } = require('util');
 
 class RedisClient {
   constructor() {
@@ -19,6 +20,10 @@ class RedisClient {
     this.client.on('end', () => {
       console.log('Redis client connection ended');
     });
+
+    this.getAsync = promisify(this.client.get).bind(this.client);
+    this.setAsync = promisify(this.client.set).bind(this.client);
+    this.delAsync = promisify(this.client.del).bind(this.client);
   }
 
   isAlive() {
@@ -27,12 +32,7 @@ class RedisClient {
 
   async get(key) {
     try {
-      const value = await new Promise((resolve, reject) => {
-        this.client.get(key, (err, reply) => {
-          if (err) reject(err);
-          else resolve(reply);
-        });
-      });
+      const value = await this.getAsync(key);
       return value;
     } catch (error) {
       console.error(`Error fetching value from Redis: ${error.message}`);
@@ -42,7 +42,7 @@ class RedisClient {
 
   async set(key, value, duration) {
     try {
-      this.client.set(key, value, 'EX', duration);
+      await this.setAsync(key, value, 'EX', duration);
     } catch (error) {
       console.error(`Error setting value in Redis: ${error.message}`);
     }
@@ -50,7 +50,7 @@ class RedisClient {
 
   async del(key) {
     try {
-      this.client.del(key);
+      await this.delAsync(key);
     } catch (error) {
       console.error(`Error deleting value from Redis: ${error.message}`);
     }

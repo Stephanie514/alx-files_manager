@@ -1,4 +1,3 @@
-// FilesController.js
 import mime from 'mime-types';
 
 const fs = require('fs');
@@ -258,6 +257,32 @@ class FilesController {
       return res.status(200).send(fileContent);
     } catch (error) {
       console.error('Error in getFile:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+
+  static async getFileData(req, res) {
+    try {
+      const { id } = req.params;
+      const { size } = req.query;
+
+      const file = await dbClient.db.collection('files').findOne({ _id: new ObjectId(id) });
+      if (!file) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+
+      let filePath = file.localPath;
+      if (size) {
+        filePath = `${filePath}_${size}`;
+      }
+
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+
+      return res.sendFile(filePath);
+    } catch (error) {
+      console.error('Error in getFileData:', error);
       return res.status(500).json({ error: 'Internal Server Error' });
     }
   }

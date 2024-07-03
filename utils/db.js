@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 
 class DBClient {
   constructor() {
@@ -9,7 +9,7 @@ class DBClient {
     const url = `mongodb://${host}:${port}`;
     this.client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
     this.dbName = database;
-    this.db = null; // Initialize db reference
+    this.db = null; // Initializing db reference
 
     this.connect();
   }
@@ -50,6 +50,42 @@ class DBClient {
     } catch (error) {
       console.error(`Error counting files: ${error.message}`);
       return 0;
+    }
+  }
+
+  async findFileById(id) {
+    try {
+      if (!this.isAlive() || !ObjectId.isValid(id)) return null;
+      const collection = this.db.collection('files');
+      const file = await collection.findOne({ _id: new ObjectId(id) });
+      return file;
+    } catch (error) {
+      console.error(`Error finding file by id: ${error.message}`);
+      return null;
+    }
+  }
+
+  async updateUserById(id, userData) {
+    try {
+      if (!this.isAlive() || !ObjectId.isValid(id)) return false;
+      const collection = this.db.collection('users');
+      const result = await collection.updateOne({ _id: new ObjectId(id) }, { $set: userData });
+      return result.modifiedCount > 0;
+    } catch (error) {
+      console.error(`Error updating user by id: ${error.message}`);
+      return false;
+    }
+  }
+
+  async deleteUserById(id) {
+    try {
+      if (!this.isAlive() || !ObjectId.isValid(id)) return false;
+      const collection = this.db.collection('users');
+      const result = await collection.deleteOne({ _id: new ObjectId(id) });
+      return result.deletedCount > 0;
+    } catch (error) {
+      console.error(`Error deleting user by id: ${error.message}`);
+      return false;
     }
   }
 }
