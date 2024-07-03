@@ -1,3 +1,4 @@
+// UsersController.js
 const crypto = require('crypto');
 const { ObjectId } = require('mongodb');
 const dbClient = require('../utils/db');
@@ -50,6 +51,7 @@ class UsersController {
       }
 
       const userId = await redisClient.get(`auth_${token}`);
+
       if (!userId) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
